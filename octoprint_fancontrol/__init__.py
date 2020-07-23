@@ -226,7 +226,7 @@ class FanControl(octoprint.plugin.StartupPlugin,
 
                 # version check: github repository
                 type="github_release",
-                user="kantlivelong",
+                user="mtmeyer32",
                 repo="OctoPrint-FanControl",
                 current=self._plugin_version,
 
