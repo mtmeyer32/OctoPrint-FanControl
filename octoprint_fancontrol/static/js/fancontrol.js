@@ -22,9 +22,9 @@ $(function() {
             self.isFanOn(data.isFanOn);
 
             if (self.isFanOn()) {
-                self.fan_indicator.addClass("spin");
+                self.fan_indicator.children(".fan-icon").addClass("spin")
             } else {
-                self.fan_indicator.removeClass("spin");
+                self.fan_indicator.children(".fan-icon").removeClass("spin");
             }
 
         };
