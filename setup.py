@@ -3,7 +3,7 @@ import setuptools
 
 ########################################################################################################################
 
-plugin_identifier = "Fancontrol"
+plugin_identifier = "fancontrol"
 plugin_package = "octoprint_%s" % plugin_identifier
 plugin_name = "OctoPrint-FanControl"
 plugin_version = "0.1.0"
