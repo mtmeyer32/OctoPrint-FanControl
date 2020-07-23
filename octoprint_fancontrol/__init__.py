@@ -216,7 +216,7 @@ class FanControl(octoprint.plugin.StartupPlugin,
     def get_assets(self):
         return {
             "js": ["js/fancontrol.js"],
-            "css": ["css/fan.js"]
+            "css": ["css/fan.css"]
         } 
 
     def get_update_information(self):
