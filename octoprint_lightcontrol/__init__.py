@@ -14,7 +14,7 @@ import threading
 import os
 from flask import make_response, jsonify
 
-class LightControl(octoprint.plugin.StartupPlugin,
+class FanControl(octoprint.plugin.StartupPlugin,
                    octoprint.plugin.TemplatePlugin,
                    octoprint.plugin.AssetPlugin,
                    octoprint.plugin.SettingsPlugin,
@@ -28,8 +28,8 @@ class LightControl(octoprint.plugin.StartupPlugin,
         self.GPIOMode = ''
         self.onoffGPIOPin = 0
         self.invertonoffGPIOPin = False
-        self.isLightOn = False
-        self._checkLightTimer = None
+        self.isFanOn = False
+        self._checkFanTimer = None
         self._configuredGPIOPins = []
 
     def on_settings_initialized(self):
@@ -47,8 +47,8 @@ class LightControl(octoprint.plugin.StartupPlugin,
 
         self._configure_gpio()
 
-        self._checkLightTimer = RepeatedTimer(5.0, self.check_light_state, None, None, True)
-        self._checkLightTimer.start()
+        self._checkFanTimer = RepeatedTimer(5.0, self.check_fan_state, None, None, True)
+        self._checkFanTimer.start()
 
     def _gpio_board_to_bcm(self, pin):
         if GPIO.RPI_REVISION == 1:
@@ -111,10 +111,10 @@ class LightControl(octoprint.plugin.StartupPlugin,
         except (RuntimeError, ValueError) as e:
             self._logger.error(e)
 
-    def check_light_state(self):
-        old_isLightOn = self.isLightOn
+    def check_fan_state(self):
+        old_isFanOn = self.isFanOn
 
-        self._logger.debug("Polling Light state...")
+        self._logger.debug("Polling Fan state...")
         r = 0
         try:
             r = GPIO.input(self._gpio_get_pin(self.onoffGPIOPin))
@@ -123,18 +123,18 @@ class LightControl(octoprint.plugin.StartupPlugin,
         self._logger.debug("Result: %s" % r)
 
         if r==1:
-            self.isLightOn = True
+            self.isFanOn = True
         elif r==0:
-            self.isLightOn = False
+            self.isFanOn = False
         
-        self._logger.debug("isLightOn: %s" % self.isLightOn)
+        self._logger.debug("isFanOn: %s" % self.isFanOn)
 
-        self._plugin_manager.send_plugin_message(self._identifier, dict(isLightOn=self.isLightOn))
+        self._plugin_manager.send_plugin_message(self._identifier, dict(isFanOn=self.isFanOn))
 
-    def turn_light_on(self):
-        self._logger.info("Switching Light On")
+    def turn_fan_on(self):
+        self._logger.info("Switching Fan On")
 
-        self._logger.debug("Switching Light On Using GPIO: %s" % self.onoffGPIOPin)
+        self._logger.debug("Switching Fan On Using GPIO: %s" % self.onoffGPIOPin)
         if not self.invertonoffGPIOPin:
             pin_output=GPIO.HIGH
         else:
@@ -145,12 +145,12 @@ class LightControl(octoprint.plugin.StartupPlugin,
         except (RuntimeError, ValueError) as e:
             self._logger.error(e)
 
-        self.check_light_state()
+        self.check_fan_state()
 
-    def turn_light_off(self):
-        self._logger.info("Switching Light Off")
+    def turn_fan_off(self):
+        self._logger.info("Switching Fan Off")
 
-        self._logger.debug("Switching Light Off Using GPIO: %s" % self.onoffGPIOPin)
+        self._logger.debug("Switching Fan Off Using GPIO: %s" % self.onoffGPIOPin)
         if not self.invertonoffGPIOPin:
             pin_output=GPIO.LOW
         else:
@@ -161,31 +161,31 @@ class LightControl(octoprint.plugin.StartupPlugin,
         except (RuntimeError, ValueError) as e:
             self._logger.error(e)
 
-        self.check_light_state()
+        self.check_fan_state()
 
     def get_api_commands(self):
         return dict(
-            turnLightOn=[],
-            turnLightOff=[],
-            toggleLight=[],
-            getLightState=[]
+            turnFanOn=[],
+            turnFanOff=[],
+            toggleFan=[],
+            getFanState=[]
         )
 
     def on_api_command(self, command, data):
         if not user_permission.can():
             return make_response("Insufficient rights", 403)
         
-        if command == 'turnLightOn':
-            self.turn_light_on()
-        elif command == 'turnLightOff':
-            self.turn_light_off()
-        elif command == 'toggleLight':
-            if self.isLightOn:
-                self.turn_light_off()
+        if command == 'turnFanOn':
+            self.turn_fan_on()
+        elif command == 'turnFanOff':
+            self.turn_fan_off()
+        elif command == 'toggleFan':
+            if self.isFanOn:
+                self.turn_fan_off()
             else:
-                self.turn_light_on()
-        elif command == 'getLightState':
-            return jsonify(isLightOn=self.isLightOn)
+                self.turn_fan_on()
+        elif command == 'getFanState':
+            return jsonify(isFanOn=self.isFanOn)
 
     def get_settings_defaults(self):
         return dict(
@@ -215,31 +215,31 @@ class LightControl(octoprint.plugin.StartupPlugin,
 
     def get_assets(self):
         return {
-            "js": ["js/lightcontrol.js"]
+            "js": ["js/fancontrol.js"]
         } 
 
     def get_update_information(self):
         return dict(
-            lightcontrol=dict(
-                displayName="Light Control",
+            fancontrol=dict(
+                displayName="Fan Control",
                 displayVersion=self._plugin_version,
 
                 # version check: github repository
                 type="github_release",
                 user="kantlivelong",
-                repo="OctoPrint-LightControl",
+                repo="OctoPrint-FanControl",
                 current=self._plugin_version,
 
                 # update method: pip w/ dependency links
-                pip="https://github.com/kantlivelong/OctoPrint-LightControl/archive/{target_version}.zip"
+                pip="https://github.com/mtmeyer32/OctoPrint-FanControl/archive/{target_version}.zip"
             )
         )
 
-__plugin_name__ = "Light Control"
+__plugin_name__ = "Fan Control"
 
 def __plugin_load__():
     global __plugin_implementation__
-    __plugin_implementation__ = LightControl()
+    __plugin_implementation__ = FanControl()
 
     global __plugin_hooks__
     __plugin_hooks__ = {

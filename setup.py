@@ -3,14 +3,14 @@ import setuptools
 
 ########################################################################################################################
 
-plugin_identifier = "lightcontrol"
+plugin_identifier = "Fancontrol"
 plugin_package = "octoprint_%s" % plugin_identifier
-plugin_name = "OctoPrint-LightControl"
+plugin_name = "OctoPrint-FanControl"
 plugin_version = "0.1.0"
-plugin_description = "Control light using a relay."
+plugin_description = "Control fan using a relay."
 plugin_author = "Shawn Bruce"
 plugin_author_email = "kantlivelong@gmail.com"
-plugin_url = "https://github.com/kantlivelong/OctoPrint-LightControl"
+plugin_url = "https://github.com/mtmeyer32/OctoPrint-FanControl"
 plugin_license = "AGPLv3"
 plugin_additional_data = []
 
